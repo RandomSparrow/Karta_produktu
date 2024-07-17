@@ -1,0 +1,56 @@
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+.navbar-brand {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link {
+    font-size: 1.1em;
+}
+
+.nav-item.active .nav-link {
+    font-weight: bold;
+    border-bottom: 2px solid #fff;
+}
+
+.alert {
+    margin-bottom: 1.5rem;
+}
+
+.btn-close {
+    float: right;
+}
+
+.navbar-nav .nav-item .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.navbar-nav .nav-item .nav-link:hover {
+    color: white;
+}
+
+.navbar-nav .user-info {
+    text-align: center; /* Wyśrodkowanie tekstu */
+}
+
+.user-info .nav-link {
+    font-size: 0.875rem; /* Mniejsza czcionka */
+}
+
+.user-info .user-title {
+    font-weight: bold; /* Pogrubienie */
+}
+
+.user-info .user-name {
+    font-size: 0.875rem; /* Mniejsza czcionka */
+    font-weight: normal; /* Normalna waga czcionki */
+}
+
+.logout-link {
+    font-weight: bold; /* Pogrubienie */
+    margin-right: 10px;
+    margin-top: 5px;
+}

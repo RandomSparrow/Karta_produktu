@@ -1,0 +1,12 @@
+flask
+flask_sqlalchemy
+flask_bcrypt
+flask_login
+flask_wtf
+wtforms
+sqlalchemy
+psycopg2-binary
+python-docx
+openai
+langchain
+werkzeug

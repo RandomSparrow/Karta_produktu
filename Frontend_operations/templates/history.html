@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}
+  Historia
+{% endblock %}
+
+{% block content %}
+  <style>
+    body {
+      background-color: #212121;
+      color: white;
+    }
+    .table th, .table td {
+      text-align: center; /* Wyśrodkowanie tekstu w komórkach tabeli */
+    }
+    .search-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      margin-top: 10px;
+    }
+    .search-bar input {
+      border: 1px solid #ced4da;
+      border-radius: .25rem;
+      padding: .375rem .75rem;
+      background-color: #343a40;
+      color: white;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+    .search-bar input::placeholder {
+      color: #6c757d;
+    }
+    .btn-clear-search {
+      width: 10%;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: .375rem .75rem;
+      border-radius: .25rem;
+      text-decoration: none;
+      font-size: 1rem;
+      text-align: center;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    .btn-clear-search:hover {
+      background-color: #c82333;
+      color: white;
+    }
+    colgroup col:nth-child(1) {
+      width: 10%; 
+    }
+    colgroup col:nth-child(2) {
+      width: 25%; 
+    }
+    colgroup col:nth-child(3) {
+      width: 25%; 
+    }
+    colgroup col:nth-child(4) {
+      width: 40%; 
+    }
+    #searchUser {
+      width: 25%;
+    }
+    #searchDate {
+      width: 25%;
+    }
+    #searchFile {
+      width: 40%;
+    }
+  </style>
+
+  <div class="search-bar">
+    <button id="clearSearch" class="btn-clear-search">Wyczyść</button>
+    <input type="text" id="searchUser" class="form-control" placeholder="Szukaj w Użytkownik">
+    <input type="text" id="searchDate" class="form-control" placeholder="Szukaj w Data">
+    <input type="text" id="searchFile" class="form-control" placeholder="Szukaj w Plik">
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover table-dark">
+      <colgroup>
+        <col>
+        <col>
+        <col>
+        <col>
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Użytkownik</th>
+          <th scope="col">Data</th>
+          <th scope="col">Plik</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% for item in items %}
+        <tr>
+          <td>{{ item.id }}</td>
+          <td class="user">{{ item.name }} {{ item.lastname }}</td>
+          <td class="date">{{ item.date }}</td>
+          <td class="file">{{ item.file }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      function filterTable() {
+        var userValue = $("#searchUser").val().toLowerCase();
+        var dateValue = $("#searchDate").val().toLowerCase();
+        var fileValue = $("#searchFile").val().toLowerCase();
+
+        $("#tableBody tr").filter(function() {
+          var userMatch = $(this).find('.user').text().toLowerCase().indexOf(userValue) > -1;
+          var dateMatch = $(this).find('.date').text().toLowerCase().indexOf(dateValue) > -1;
+          var fileMatch = $(this).find('.file').text().toLowerCase().indexOf(fileValue) > -1;
+          
+          $(this).toggle(userMatch && dateMatch && fileMatch);
+        });
+      }
+
+      function clearSearch() {
+        $("#searchUser").val('');
+        $("#searchDate").val('');
+        $("#searchFile").val('');
+        filterTable();
+      }
+
+      $("#searchUser, #searchDate, #searchFile").on("keyup", filterTable);
+      $("#clearSearch").on("click", clearSearch);
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}
+    Login Page
+{% endblock %}
+
+{% block content %}
+<body class="text-center">
+    <div class="container">
+        <form method="POST" class="form-signin">
+            {{ form.hidden_tag() }}
+            <h1 class="h3 mb-3 font-weight-normal">
+                Zaloguj się
+            </h1>
+            <br>
+            <div class="form-group">
+                {{ form.email.label(class="sr-only") }}
+                {{ form.email(class="form-control", placeholder="E-mail", required=True, autofocus=True) }}
+            </div>
+            <div class="form-group">
+                {{ form.password.label(class="sr-only") }}
+                {{ form.password(class="form-control", placeholder="Hasło", required=True) }}
+            </div>
+            <br>
+            {{ form.submit(class="btn btn-lg btn-primary btn-block") }}
+            <br>
+            <div class="checkbox mb-3">
+                <h6>Nie posiadasz jeszcze konta?</h6>
+                <a class="btn btn-sm btn-secondary" href="{{ url_for('register_page') }}">Rejestracja</a>
+            </div>
+        </form>
+    </div>
+    <style>
+        body {
+            background-color: #212121;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 400px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-top: 70px;
+        }
+        .form-signin {
+            width: 100%;
+            padding: 15px;
+        }
+        .form-control {
+            margin-bottom: 10px;
+            height: calc(1.5em + 1.25rem + 2px);
+            padding: 0.625rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+        .btn {
+            margin-bottom: 15px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .checkbox h6 {
+            margin-bottom: 10px;
+        }
+    </style>
+</body>
+{% endblock %}

@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+{% block title %}
+  Baza danych
+{% endblock %}
+
+{% block content %}
+  <style>
+    body {
+      background-color: #212121;
+      color: white;
+    }
+    .table th, .table td {
+      text-align: center;
+    }
+    .search-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      margin-top: 5px;
+    }
+    .search-bar input {
+      border: 1px solid #ced4da;
+      border-radius: .25rem;
+      padding: .375rem .75rem;
+      background-color: #343a40;
+      color: white;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+    .search-bar input::placeholder {
+      color: #6c757d;
+    }
+    .btn-clear-search {
+      width: 10%;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: .375rem .75rem;
+      border-radius: .25rem;
+      text-decoration: none;
+      font-size: 1rem;
+      text-align: center;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    .btn-clear-search:hover {
+      background-color: #c82333;
+      color: white;
+    }
+    .btn-add-translation {
+      width: 20%;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: .375rem .75rem;
+      border-radius: .25rem;
+      text-decoration: none;
+      font-size: 1rem;
+      margin-left: 10px;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-add-translation i {
+      margin-right: .25rem;
+    }
+    .btn-add-translation:hover {
+      background-color: #218838;
+      color: white;
+    }
+    .modal-content {
+      background-color: #343a40;
+      color: white;
+      border-radius: .3rem;
+    }
+    .modal-header {
+      border-bottom: 1px solid #444;
+    }
+    .modal-footer {
+      border-top: 1px solid #444;
+    }
+    .add-translation-form .form-control {
+      background-color: #495057;
+      color: white;
+      border: 1px solid #ced4da;
+      margin-bottom: 15px;
+    }
+    .add-translation-form .form-control::placeholder {
+      color: #adb5bd; /* Jaśniejszy kolor czcionki w placeholderach */
+    }
+    .add-translation-form .form-control:focus {
+      background-color: #495057;
+      color: white;
+    }
+    .dropdown-toggle::after {
+      content: none; /* Usuń domyślną strzałkę Bootstrap */
+    }
+    .dropdown-menu {
+      background-color: #495057;
+      color: white;
+      border: 1px solid #ced4da;
+    }
+    .dropdown-menu a {
+      color: white;
+    }
+    .dropdown-menu a:hover {
+      background-color: #343a40;
+    }
+  </style>
+  {% if current_user.role == "1" %}
+  <style>
+    #searchText {
+      width: 35%;
+    }
+    #searchLanguage {
+      width: 20%;
+    }
+    #searchTranslation {
+      width: 35%;
+    }
+  </style>
+  {% else %}
+  <style>
+    #searchText {
+      width: 25%;
+    }
+    #searchLanguage {
+      width: 20%;
+    }
+    #searchTranslation {
+      width: 25%;
+    }
+  </style>
+  {% endif %}
+
+  <div>
+    <div class="search-bar">
+      <button id="clearSearch" class="btn-clear-search">Wyczyść</button>
+      <input type="text" id="searchText" class="form-control" placeholder="Szukaj w Fraza">
+      <input type="text" id="searchLanguage" class="form-control" placeholder="Szukaj w Język">
+      <input type="text" id="searchTranslation" class="form-control" placeholder="Szukaj w Tłumaczenie">
+      {% if current_user.role == "2" %}
+      <a href="#" class="btn-add-translation" data-bs-toggle="modal" data-bs-target="#addTranslationModal">
+        <i class="fas fa-plus"></i> Dodaj tłumaczenie
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="addTranslationModal" tabindex="-1" aria-labelledby="addTranslationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addTranslationModalLabel">Dodaj tłumaczenie</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body add-translation-form">
+          <input type="text" id="newText" class="form-control" placeholder="Fraza">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle form-control" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+              Wybierz język
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              {% for language in languages %}
+              <li><a class="dropdown-item" href="#" data-language="{{ language.language_name }}">{{ language.language_name }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          <input type="hidden" id="newLanguage" class="form-control">
+          <input type="text" id="newTranslation" class="form-control" placeholder="Tłumaczenie">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+          <button type="button" class="btn btn-success" id="addTranslationBtn">Akceptuj</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover table-dark">
+      <colgroup>
+        <col style="width: 10%;">
+        {% if current_user.role == "1" %}
+        <col style="width: 35%;">
+        <col style="width: 20%;">
+        <col style="width: 35%;">
+        {% else %}
+        <col style="width: 25%;">
+        <col style="width: 20%;">
+        <col style="width: 25%;">
+        <col style="width: 20%;">
+        {% endif %}
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Fraza</th>
+          <th scope="col">Język</th>
+          <th scope="col">Tłumaczenie</th>
+          {% if current_user.role == "2" %}
+          <th scope="col">Operacje</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% for item in items %}
+        <tr data-id="{{ item.translation_id }}">
+          <td>{{ item.translation_id }}</td>
+          <td class="text">{{ item.text }}</td>
+          <td class="language">{{ item.language_name }}</td>
+          <td class="translation">{{ item.translation_text }}</td>
+          {% if current_user.role == "2" %}
+          <td>
+            <button class="btn btn-outline-info btn-sm edit-btn">Edytuj</button>
+            <button class="btn btn-outline-danger btn-sm delete-btn">Usuń</button>
+            <button class="btn btn-outline-success btn-sm save-btn d-none">Zapisz</button>
+            <button class="btn btn-outline-secondary btn-sm cancel-btn d-none">Anuluj</button>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      function filterTable() {
+        var textValue = $("#searchText").val().toLowerCase();
+        var languageValue = $("#searchLanguage").val().toLowerCase();
+        var translationValue = $("#searchTranslation").val().toLowerCase();
+
+        $("#tableBody tr").filter(function() {
+          var textMatch = $(this).find('.text').text().toLowerCase().indexOf(textValue) > -1;
+          var languageMatch = $(this).find('.language').text().toLowerCase().indexOf(languageValue) > -1;
+          var translationMatch = $(this).find('.translation').text().toLowerCase().indexOf(translationValue) > -1;
+          
+          $(this).toggle(textMatch && languageMatch && translationMatch);
+        });
+      }
+
+      function clearSearch() {
+        $("#searchText").val('');
+        $("#searchLanguage").val('');
+        $("#searchTranslation").val('');
+        filterTable();
+      }
+
+      function editRow(row) {
+        var text = row.find('.text').text();
+        var translation = row.find('.translation').text();
+
+        row.find('.text').html('<input type="text" class="form-control form-control-sm edit-text" value="' + text + '">');
+        row.find('.translation').html('<input type="text" class="form-control form-control-sm edit-translation" value="' + translation + '">');
+        row.find('.edit-btn').addClass('d-none');
+        row.find('.delete-btn').addClass('d-none');
+        row.find('.save-btn').removeClass('d-none');
+        row.find('.cancel-btn').removeClass('d-none');
+      }
+
+      function cancelEditRow(row) {
+        var text = row.find('.edit-text').val();
+        var translation = row.find('.edit-translation').val();
+
+        row.find('.text').text(text);
+        row.find('.translation').text(translation);
+        row.find('.edit-btn').removeClass('d-none');
+        row.find('.delete-btn').removeClass('d-none');
+        row.find('.save-btn').addClass('d-none');
+        row.find('.cancel-btn').addClass('d-none');
+      }
+
+      function saveRow(row) {
+        var id = row.data('id');
+        var newText = row.find('.edit-text').val();
+        var newTranslation = row.find('.edit-translation').val();
+
+        $.ajax({
+          url: '/update_translation/' + id,
+          type: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({ text: newText, translation: newTranslation }),
+          success: function(response) {
+            row.find('.text').text(newText);
+            row.find('.translation').text(newTranslation);
+            row.find('.edit-btn').removeClass('d-none');
+            row.find('.delete-btn').removeClass('d-none');
+            row.find('.save-btn').addClass('d-none');
+            row.find('.cancel-btn').addClass('d-none');
+          },
+          error: function(xhr, status, error) {
+            alert('Wystąpił błąd podczas zapisywania danych.');
+          }
+        });
+      }
+
+      function deleteRow(row) {
+        var id = row.data('id');
+
+        $.ajax({
+          url: '/delete_translation/' + id,
+          type: 'DELETE',
+          success: function(response) {
+            row.remove();
+            alert('Tłumaczenie zostało usunięte.');
+          },
+          error: function(xhr, status, error) {
+            alert('Wystąpił błąd podczas usuwania tłumaczenia.');
+          }
+        });
+      }
+
+      function addTranslation() {
+        var newText = $("#newText").val();
+        var newLanguage = $("#newLanguage").val();
+        var newTranslation = $("#newTranslation").val();
+
+        $.ajax({
+          url: '/add_translation',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ text: newText, language: newLanguage, translation: newTranslation }),
+          success: function(response) {
+            location.reload();
+          },
+          error: function(xhr, status, error) {
+            alert('Wystąpił błąd podczas dodawania tłumaczenia.');
+          }
+        });
+      }
+
+      $(".btn-add-translation").on("click", function() {
+        $("#addTranslationModal").modal('show');
+      });
+
+      $("#cancelAddTranslationBtn").on("click", function() {
+        $(".add-translation-form").hide();
+        $("#newText").val('');
+        $("#newLanguage").val('');
+        $("#newTranslation").val('');
+      });
+
+      $("#addTranslationBtn").on("click", function() {
+        addTranslation();
+      });
+
+      $("#searchText, #searchLanguage, #searchTranslation").on("keyup", filterTable);
+      $("#clearSearch").on("click", clearSearch);
+
+      $("#tableBody").on("click", ".edit-btn", function() {
+        var row = $(this).closest('tr');
+        editRow(row);
+      });
+
+      $("#tableBody").on("click", ".save-btn", function() {
+        var row = $(this).closest('tr');
+        saveRow(row);
+      });
+
+      $("#tableBody").on("click", ".cancel-btn", function() {
+        var row = $(this).closest('tr');
+        cancelEditRow(row);
+      });
+
+      $("#tableBody").on("click", ".delete-btn", function() {
+        var row = $(this).closest('tr');
+        if (confirm('Czy na pewno chcesz usunąć to tłumaczenie?')) {
+          deleteRow(row);
+        }
+      });
+
+      $(".dropdown-item").on("click", function() {
+        var selectedLanguage = $(this).data('language');
+        $("#newLanguage").val(selectedLanguage);
+        $("#dropdownMenuButton").text(selectedLanguage);
+      });
+    });
+  </script>
+{% endblock %}
