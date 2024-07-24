@@ -6,7 +6,9 @@ from logs.logger import logging
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func
 from BackendOperations.database import session, Language, TextModel, Translation
+from dotenv import load_dotenv
 
+load_dotenv()
 class Translations:
     def __init__(self, client):
         self.client = client
@@ -28,7 +30,7 @@ class Translations:
     def create_translation(self, prompt):
         try:
             response = self.client.chat.completions.create(
-                model='ft:gpt-3.5-turbo-0125:atlas:translator:9lDfH6hm',
+                model= os.getenv('model'),
                 messages=[
                     {
                         "role": "system",

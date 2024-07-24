@@ -55,11 +55,17 @@ class ImportOperations:
                                             run.font.size = Pt(9)
                                             paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                                             run.bold = True
-                                        if placeholder in ["{{usecase}}", "{{system}}", "{{standard}}"]:
+                                        if placeholder in ["{{system}}", "{{standard}}"]:
+                                            run.font.name = 'Arial'
+                                            run.font.size = Pt(9)
+                                            self._set_paragraph_format(run, "AI")
+                                            paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                                        if placeholder == "{{usecase}}":
                                             run.font.name = 'Arial'
                                             run.font.size = Pt(9)
                                             self._set_paragraph_format(run)
                                             paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                                
             logging.info("Placeholders filled successfully")
             return doc
         except Exception as e:
@@ -128,9 +134,10 @@ class ImportOperations:
                     for paragraph in row_cells[1].paragraphs:
                         paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                         for run in paragraph.runs:
-                            self._set_paragraph_format(run)
+                            self._set_paragraph_format(run, "AI")
                             run.font.name = 'Arial'
                             run.font.size = Pt(9)
+                            
 
             logging.info("Table filled successfully")
             return doc
@@ -138,12 +145,13 @@ class ImportOperations:
             logging.error(f"Error filling table: {e}")
             raise
 
-    def _set_paragraph_format(self, run):
-        
+    def _set_paragraph_format(self, run, AI=None):
         if "BRAK TŁUMACZENIA" in run.text:
-            run.font.color.rgb = RGBColor(255, 0, 0)
+            run.font.color.rgb = RGBColor(255, 0, 0)  # Czerwony kolor
             run.text = run.text.replace("[AI]", "")
         elif "[AI]" in run.text:
-            run.font.color.rgb = RGBColor(0, 0, 255)
+            run.font.color.rgb = RGBColor(0, 0, 255)  # Niebieski kolor
+
+        if AI and "[AI]" in run.text:
             run.text = run.text.replace("[AI]", "")
         

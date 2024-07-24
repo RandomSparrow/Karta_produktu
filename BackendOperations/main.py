@@ -7,6 +7,7 @@ from BackendOperations.export_operations import ExportOperations
 from BackendOperations.translations import Translations
 from BackendOperations.import_operations import ImportOperations
 from logs.logger import logging
+from dotenv import load_dotenv
 
 def create_body(translation):
     try:
@@ -48,29 +49,83 @@ def initialize_translation_instance(api_key):
 def process_language_translations(instance, to_translate, template, language):
     try:
         translated_template = template[:]
+        Splited_words = []
+        translated_characteristics = []
+
+        def translate_with_period_handling(text):
+            text = text.rstrip()
+            has_period = text.endswith(".")
+            if has_period:
+                text = text[:-1]  # Usuń kropkę
+            translated = instance.database_translation(text, language)
+            if translated is None:
+                prompt = instance.create_prompt(text, language)
+                translated = instance.create_translation(prompt)
+                translated = f"{translated} [AI]"
+            if has_period:
+                translated += "."  # Dodaj kropkę z powrotem
+            return translated
+
+        for word in to_translate[:1]:
+            if "\n" in word:
+                delimiter = "\n"
+            else:
+                delimiter = None
+
+            if delimiter:
+                split_words = word.split(delimiter)
+            else:
+                split_words = [word]
+
+            for split_word in split_words:
+                translated = translate_with_period_handling(split_word)
+                Splited_words.append(translated)
+            
+            if delimiter:
+                translated_word = delimiter.join(Splited_words)
+            else:
+                translated_word = Splited_words[0]
+            
+            Splited_words.clear()
+            
+            translated_template.append(translated_word)
 
         # Process main data
-        for word in to_translate[:2]:
-            translated = instance.database_translation(word, language)
-            if translated is not None:
-                translated_template.append(translated)
-            else:
-                prompt = instance.create_prompt(word, language)
-                translated = instance.create_translation(prompt)
-                translated_template.append(f"{translated} [AI]")
+        for word in to_translate[1:2]:
+            translated = translate_with_period_handling(word)
+            translated_template.append(translated)
 
         # Process characteristics
-        translated_characteristics = []
         for table in to_translate[2:]:
             table_translations = []
-            for characteristic in table:
-                    translated = instance.database_translation(characteristic, language)
-                    if translated is not None:
-                        table_translations.append(translated)
+            for i, characteristic in enumerate(table, start=1):
+                if i % 2 == 0:  # Co drugi element
+                    # Tłumaczenie bez dzielenia przez "\n"
+                    translated = translate_with_period_handling(characteristic)
+                    table_translations.append(translated)
+                else:
+                    # Tłumaczenie z dzieleniem przez "\n"
+                    if "\n" in characteristic:
+                        delimiter = "\n"
                     else:
-                        prompt = instance.create_prompt(characteristic, language)
-                        translated = instance.create_translation(prompt)
-                        table_translations.append(f"{translated} [AI]")
+                        delimiter = None
+
+                    if delimiter:
+                        split_characteristics = characteristic.split(delimiter)
+                    else:
+                        split_characteristics = [characteristic]
+                    translated_parts = []
+                    for split_characteristic in split_characteristics:
+                        translated = translate_with_period_handling(split_characteristic)
+                        translated_parts.append(translated)
+
+                    if delimiter:
+                        
+                        translated_characteristic = delimiter.join(translated_parts)
+                    else:
+                        translated_characteristic = translated_parts[0]
+                    table_translations.append(translated_characteristic)
+
             translated_characteristics.append(table_translations)
 
         translated_template.append(translated_characteristics)
@@ -125,6 +180,7 @@ def import_translated_data(language, template, empty, sign, save_path):
 
 def main(src, save_path):
     try:
+        load_dotenv()
         empty = glob("BackendOperations\\Templates/*")
         
         # Export data from document
@@ -133,7 +189,7 @@ def main(src, save_path):
         # Languages for translation
         languages = {"English":"EN", "Czech":"CZ", "German":"DE", "Lithuanian":"LT", "Latvian":"LV", "Slovak":"SK"}
         # API Key for OpenAI
-        Key = "sk-proj-8DNPgF5srINl2NQC86PjT3BlbkFJpKCv2ZACt7guVImVhtij"
+        Key = os.getenv('pwd')
         instance = initialize_translation_instance(Key)
         
         # Process translations and import data for each language

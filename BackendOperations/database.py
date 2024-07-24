@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, UniqueConstraint, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+import os
+from dotenv import load_dotenv
 
-DATABASE_URI = 'postgresql://postgres:Atlas@localhost/Atlas'
+load_dotenv()
+DATABASE_URI = os.getenv('user')
 
 # Tworzenie silnika bazy danych
 engine = create_engine(DATABASE_URI)
