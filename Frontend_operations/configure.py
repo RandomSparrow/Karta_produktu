@@ -13,8 +13,8 @@ load_dotenv()
 
 try:
     app = Flask(__name__)
-    app.config['UPLOAD_FOLDER'] = 'Frontend_operations\\uploads'
-    app.config['GENERATED_FOLDER'] = 'Frontend_operations\\generated'
+    app.config['UPLOAD_FOLDER'] = 'Frontend_operations/uploads'
+    app.config['GENERATED_FOLDER'] = 'Frontend_operations/generated'
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('user')
     app.config['SECRET_KEY'] = "27c1fcddffc800be09a5aff5"
     bcrypt = Bcrypt(app)

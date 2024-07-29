@@ -10,3 +10,5 @@ python-docx
 openai
 langchain
 werkzeug
+python-dotenv
+email-validator
