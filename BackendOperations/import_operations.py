@@ -30,7 +30,7 @@ class ImportOperations:
                 doc = self._fill_table(doc, self.data)
 
                 number = (self.data.get("Number")).replace('/', '_')
-                output_path = save_path + f'\\{sign}_{number}_{self.data.get("Product")}_DWU_{self.data.get("Signature date")}.docx'
+                output_path = save_path + f'/{sign}_{number}_{self.data.get("Product")}_DWU_{self.data.get("Signature date")}.docx'
                 doc.save(output_path)
                 logging.info(f"Document saved to {output_path}")
         except Exception as e:
