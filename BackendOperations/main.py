@@ -182,7 +182,8 @@ def main(src, save_path):
     try:
         load_dotenv()
         empty = glob("BackendOperations/Templates/*")
-        
+        empty.sort()
+        print(empty)
         # Export data from document
         to_translate, template = export_document_data(src)
 
